@@ -1,0 +1,23 @@
+name: Build Dawn
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Build Windows",
+            os: windows-latest
+          }
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Download Depot Tools
+        shell: pwsh
+        run: |
+          Write-Host "Hello World"
