@@ -1,0 +1,18 @@
+is_clang=false
+visual_studio_version="2019"
+
+is_debug=true
+enable_iterator_debugging=true
+symbol_level=2
+
+dawn_complete_static_libs=false
+
+# Backends
+dawn_enable_wgsl=true
+dawn_enable_d3d12=true
+dawn_enable_vulkan=false
+dawn_enable_metal=false
+
+# Disable legacy backends
+dawn_enable_opengl=false
+dawn_use_angle=false

@@ -11,8 +11,9 @@ jobs:
       matrix:
         config:
         - {
-            name: "Build Windows",
-            os: windows-latest
+            name: "Build Windows MSVC x64 Debug",
+            os: windows-latest,
+            flavor: win_msvc_debug.txt
           }
     steps:
       - uses: actions/checkout@v1
@@ -34,3 +35,21 @@ jobs:
           cp scripts/standalone.gclient .gclient
           gclient sync
           popd
+
+      - name: Configure build of Google Dawn
+        shell: pwsh
+        run: |
+          $env:Path = '' + (Get-Location) + '/depot_tools;' + $env:Path
+          $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
+          mkdir dawn/out
+          cp flavors/${{ matrix.config.flavor }} dawn/out/args.gn
+          pushd dawn
+          gn gen out --target_cpu="x64"
+          popd
+
+      - name: Build Google Dawn
+        shell: pwsh
+        run: |
+          $env:Path = '' + (Get-Location) + '/depot_tools;' + $env:Path
+          $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
+          ninja -C dawn/out dawn_native_shared dawn_proc_shared dawncpp
