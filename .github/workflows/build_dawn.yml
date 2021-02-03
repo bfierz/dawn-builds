@@ -54,6 +54,8 @@ jobs:
           $env:Path = '' + (Get-Location) + '/depot_tools;' + $env:Path
           $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
           ninja -C dawn/out dawn_native_shared dawn_proc_shared dawncpp
+          cmake -S webgpucpp -B webgpucpp/build
+          cmake --build webgpucpp/build --config RelWithDebInfo 
 
       - name: Pack
         shell: pwsh
