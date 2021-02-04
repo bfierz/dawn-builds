@@ -69,6 +69,8 @@ jobs:
           Get-ChildItem dawn/out -Filter dawn_*.dll | Copy-Item -Destination "package/bin"
           Get-ChildItem dawn/out -Filter dawn_*.pdb | Copy-Item -Destination "package/bin"
           Get-ChildItem dawn/out -Filter dawn_*.lib | Copy-Item -Destination "package/lib"
+          Get-ChildItem webgpucpp/build/bin -Filter *.pdb | Copy-Item -Destination "package/bin"
+          Get-ChildItem webgpucpp/build/bin -Filter *.lib | Copy-Item -Destination "package/lib"
 
       - name: Upload
         uses: actions/upload-artifact@v2
