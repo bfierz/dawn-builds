@@ -14,7 +14,7 @@ jobs:
             name: "Build Windows MSVC x64 Debug",
             os: windows-latest,
             flavor: win_msvc_debug.txt,
-            package: dawn_win_x64_debug.zip
+            package: dawn_win_x64_debug
           }
     steps:
       - uses: actions/checkout@v1
@@ -63,17 +63,24 @@ jobs:
           mkdir package/bin
           mkdir package/lib
           mkdir package/include
+          mkdir symbols
           Copy-Item -Path "dawn/LICENSE" -Destination "package/LICENSE"
           Copy-Item -Path "dawn/src/include/*" -Destination "package/include" -Recurse
           Copy-Item -Path "dawn/out/gen/src/include/*" -Destination "package/include" -Recurse -Force
           Get-ChildItem dawn/out -Filter dawn_*.dll | Copy-Item -Destination "package/bin"
-          Get-ChildItem dawn/out -Filter dawn_*.pdb | Copy-Item -Destination "package/bin"
+          Get-ChildItem dawn/out -Filter dawn_*.pdb | Copy-Item -Destination "symbols"
           Get-ChildItem dawn/out -Filter dawn_*.lib | Copy-Item -Destination "package/lib"
-          Get-ChildItem webgpucpp/build/bin -Filter *.pdb | Copy-Item -Destination "package/bin"
+          Get-ChildItem webgpucpp/build/bin -Filter *.pdb | Copy-Item -Destination "symbols"
           Get-ChildItem webgpucpp/build/bin -Filter *.lib | Copy-Item -Destination "package/lib"
 
-      - name: Upload
+      - name: Upload Library
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.config.package }}
+          name: ${{ matrix.config.package }}.zip
           path: ./package
+          
+      - name: Upload Debug Symbols
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.config.package }}_pdb.zip
+          path: ./symbols
