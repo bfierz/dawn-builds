@@ -78,6 +78,7 @@ jobs:
           Get-ChildItem webgpucpp/build/bin -Filter *.pdb | Copy-Item -Destination "symbols"
           Get-ChildItem webgpucpp/build/bin -Filter *.lib | Copy-Item -Destination "package/lib"
           Compress-Archive -Path package/* -DestinationPath ${{ matrix.config.package }}.zip
+          Compress-Archive -Path symbols/* -DestinationPath ${{ matrix.config.package }}_pdb.zip
 
           # Create version number for release
           pushd dawn
