@@ -13,8 +13,16 @@ jobs:
         - {
             name: "Build Windows MSVC x64 Debug",
             os: windows-latest,
+            type: "Debug",
             flavor: win_msvc_debug.txt,
             package: dawn_win_x64_debug
+          }
+        - {
+            name: "Build Windows MSVC x64 Release",
+            os: windows-latest,
+            type: "Release",
+            flavor: win_msvc_release.txt,
+            package: dawn_win_x64_release
           }
     steps:
       - uses: actions/checkout@v1
@@ -60,7 +68,11 @@ jobs:
           $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
           ninja -C dawn/out dawn_native_shared dawn_proc_shared dawncpp
           cmake -S webgpucpp -B webgpucpp/build
-          cmake --build webgpucpp/build --config RelWithDebInfo 
+          if ('${{ matrix.config.type }}' -eq 'Debug') {
+            cmake --build webgpucpp/build --config Debug
+          } else {
+            cmake --build webgpucpp/build --config RelWithDebInfo
+          }
 
       - name: Pack
         shell: pwsh
@@ -78,6 +90,7 @@ jobs:
           Get-ChildItem webgpucpp/build/bin -Filter *.pdb | Copy-Item -Destination "symbols"
           Get-ChildItem webgpucpp/build/bin -Filter *.lib | Copy-Item -Destination "package/lib"
           Compress-Archive -Path package/* -DestinationPath ${{ matrix.config.package }}.zip
+          Compress-Archive -Path symbols/* -DestinationPath ${{ matrix.config.package }}_pdb.zip
 
           # Create version number for release
           pushd dawn
@@ -150,6 +163,18 @@ jobs:
         - {
             name: "Publish Windows MSVC x64 Debug",
             artifact: "dawn_win_x64_debug.zip"
+          }
+        - {
+            name: "Publish Windows MSVC x64 Debug PDB",
+            artifact: "dawn_win_x64_debug_pdb.zip"
+          }
+        - {
+            name: "Publish Windows MSVC x64 Release",
+            artifact: "dawn_win_x64_release.zip"
+          }
+        - {
+            name: "Publish Windows MSVC x64 Release PDB",
+            artifact: "dawn_win_x64_release_pdb.zip"
           }
     needs: release
 

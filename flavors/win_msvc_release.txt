@@ -8,7 +8,6 @@ symbol_level=0
 dawn_complete_static_libs=false
 
 # Backends
-dawn_enable_wgsl=true
 dawn_enable_d3d12=true
 dawn_enable_vulkan=false
 dawn_enable_metal=false
