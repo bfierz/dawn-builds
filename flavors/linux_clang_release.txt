@@ -1,0 +1,16 @@
+is_clang=true
+
+is_debug=false
+enable_iterator_debugging=false
+symbol_level=0
+
+dawn_complete_static_libs=false
+
+# Backends
+dawn_enable_d3d12=false
+dawn_enable_vulkan=true
+dawn_enable_metal=false
+
+# Disable legacy backends
+dawn_enable_opengl=false
+dawn_use_angle=false
