@@ -1,6 +1,12 @@
 name: Build Dawn
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
 
 jobs:
   build:
@@ -24,6 +30,13 @@ jobs:
             flavor: win_msvc_release.txt,
             package: dawn_win_x64_release
           }
+        - {
+            name: "Build Linux Clang x64 Release",
+            os: ubuntu-latest,
+            type: "Release",
+            flavor: linux_clang_release.txt,
+            package: dawn_linux_x64_release
+          }
     steps:
       - uses: actions/checkout@v1
 
@@ -31,13 +44,13 @@ jobs:
         shell: pwsh
         run: |
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
-          $env:Path = '' + (Get-Location) + '/depot_tools;' + $env:Path
+          $env:Path = '' + (Get-Location) + '/depot_tools' + [System.IO.Path]::PathSeparator + $env:Path
           gclient --version
 
       - name: Prepare Google Dawn
         shell: pwsh
         run: |
-          $env:Path = '' + (Get-Location) + '/depot_tools;' + $env:Path
+          $env:Path = '' + (Get-Location) + '/depot_tools' + [System.IO.Path]::PathSeparator + $env:Path
           $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
           git clone https://dawn.googlesource.com/dawn --no-checkout
           # Get commit to build
@@ -53,7 +66,7 @@ jobs:
       - name: Configure build of Google Dawn
         shell: pwsh
         run: |
-          $env:Path = '' + (Get-Location) + '/depot_tools;' + $env:Path
+          $env:Path = '' + (Get-Location) + '/depot_tools' + [System.IO.Path]::PathSeparator + $env:Path
           $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
           mkdir dawn/out
           cp flavors/${{ matrix.config.flavor }} dawn/out/args.gn
@@ -64,7 +77,7 @@ jobs:
       - name: Build Google Dawn
         shell: pwsh
         run: |
-          $env:Path = '' + (Get-Location) + '/depot_tools;' + $env:Path
+          $env:Path = '' + (Get-Location) + '/depot_tools' + [System.IO.Path]::PathSeparator + $env:Path
           $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
           ninja -C dawn/out dawn_native_shared dawn_proc_shared dawncpp
           cmake -S webgpucpp -B webgpucpp/build
@@ -85,12 +98,15 @@ jobs:
           Copy-Item -Path "dawn/src/include/*" -Destination "package/include" -Recurse
           Copy-Item -Path "dawn/out/gen/src/include/*" -Destination "package/include" -Recurse -Force
           Get-ChildItem dawn/out -Filter dawn_*.dll | Copy-Item -Destination "package/bin"
-          Get-ChildItem dawn/out -Filter dawn_*.pdb | Copy-Item -Destination "symbols"
           Get-ChildItem dawn/out -Filter dawn_*.lib | Copy-Item -Destination "package/lib"
-          Get-ChildItem webgpucpp/build/bin -Filter *.pdb | Copy-Item -Destination "symbols"
           Get-ChildItem webgpucpp/build/bin -Filter *.lib | Copy-Item -Destination "package/lib"
           Compress-Archive -Path package/* -DestinationPath ${{ matrix.config.package }}.zip
-          Compress-Archive -Path symbols/* -DestinationPath ${{ matrix.config.package }}_pdb.zip
+
+          if ('${{ matrix.config.type }}' -eq 'Debug') {
+            Get-ChildItem dawn/out -Filter dawn_*.pdb | Copy-Item -Destination "symbols"
+            Get-ChildItem webgpucpp/build/bin -Filter *.pdb | Copy-Item -Destination "symbols"
+            Compress-Archive -Path symbols/* -DestinationPath ${{ matrix.config.package }}_pdb.zip
+          }
 
           # Create version number for release
           pushd dawn
@@ -114,6 +130,7 @@ jobs:
 
       - name: Upload Debug Symbols
         uses: actions/upload-artifact@v2
+        if: ${{ matrix.config.type == 'Debug' }}
         with:
           name: ${{ matrix.config.package }}_pdb.zip
           path: ./${{ matrix.config.package }}_pdb.zip
@@ -121,6 +138,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: build
+    if: github.ref == 'refs/heads/main'
 
     steps:
     - name: Download Release Version
@@ -156,6 +174,7 @@ jobs:
   publish:
     name: ${{ matrix.config.name }}
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     strategy:
       fail-fast: false
       matrix:
@@ -173,8 +192,8 @@ jobs:
             artifact: "dawn_win_x64_release.zip"
           }
         - {
-            name: "Publish Windows MSVC x64 Release PDB",
-            artifact: "dawn_win_x64_release_pdb.zip"
+            name: "Publish Linux Clang x64 Release",
+            artifact: "dawn_linux_x64_release.zip"
           }
     needs: release
 
