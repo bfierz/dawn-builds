@@ -98,8 +98,11 @@ jobs:
           Copy-Item -Path "dawn/src/include/*" -Destination "package/include" -Recurse
           Copy-Item -Path "dawn/out/gen/src/include/*" -Destination "package/include" -Recurse -Force
           Get-ChildItem dawn/out -Filter dawn_*.dll | Copy-Item -Destination "package/bin"
+          Get-ChildItem dawn/out -Filter libdawn_*.so | Copy-Item -Destination "package/bin"
           Get-ChildItem dawn/out -Filter dawn_*.lib | Copy-Item -Destination "package/lib"
+          Get-ChildItem dawn/out -Filter libdawn_*.a | Copy-Item -Destination "package/lib"
           Get-ChildItem webgpucpp/build/bin -Filter *.lib | Copy-Item -Destination "package/lib"
+          Get-ChildItem webgpucpp/build/bin -Filter *.a | Copy-Item -Destination "package/lib"
           Compress-Archive -Path package/* -DestinationPath ${{ matrix.config.package }}.zip
 
           if ('${{ matrix.config.type }}' -eq 'Debug') {
