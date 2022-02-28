@@ -6,6 +6,7 @@ enable_iterator_debugging=true
 symbol_level=2
 
 dawn_complete_static_libs=false
+dawn_use_swiftshader=false
 
 # Backends
 dawn_enable_d3d12=true
