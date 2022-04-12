@@ -83,7 +83,7 @@ jobs:
         run: |
           $env:PATH = '' + (Get-Location) + '/depot_tools' + [System.IO.Path]::PathSeparator + $env:PATH
           $env:DEPOT_TOOLS_WIN_TOOLCHAIN = '0'
-          ninja -C dawn/out webgpu_dawn_shared dawn_proc dawncpp
+          ninja -C dawn/out src/dawn/native:native src/dawn/native:webgpu_dawn_shared src/dawn:proc src/dawn:cpp
           cmake -S webgpucpp -B webgpucpp/build
           if ('${{ matrix.config.type }}' -eq 'Debug') {
             cmake --build webgpucpp/build --config Debug
@@ -99,7 +99,7 @@ jobs:
           mkdir package/lib
           mkdir package/include
           Copy-Item -Path "dawn/LICENSE" -Destination "package/LICENSE"
-          Copy-Item -Path "dawn/include" -Destination "package/include" -Recurse
+          Copy-Item -Path "dawn/include/*" -Destination "package/include" -Recurse
           Copy-Item -Path "dawn/out/gen/include/*" -Destination "package/include" -Recurse -Force
           Get-ChildItem dawn/out -Filter dawn_*.dll | Copy-Item -Destination "package/bin"
           Get-ChildItem dawn/out -Filter libdawn_*.so | Copy-Item -Destination "package/bin"
