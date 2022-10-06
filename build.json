@@ -1,9 +1,8 @@
 {
-  "commits" :
-  [
+  "commits": [
     {
       "name": "dawn",
-      "commit": "5752bbf63cc04dc34672c076420ea9d8fe36f07a"
+      "commit": "529bd06284436b66b3a663143c9e3e80e22278c7"
     }
   ]
 }
