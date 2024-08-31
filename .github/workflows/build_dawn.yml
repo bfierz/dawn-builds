@@ -71,7 +71,7 @@ jobs:
         shell: pwsh
         run: |
           cmake --build dawn/out --config ${{ matrix.config.type }}
-          cmake --install dawn/out --prefix package
+          cmake --install dawn/out --prefix package --config ${{ matrix.config.type }}
 
       - name: Pack
         shell: pwsh
